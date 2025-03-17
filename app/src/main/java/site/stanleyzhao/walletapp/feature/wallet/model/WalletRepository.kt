@@ -2,31 +2,30 @@ package site.stanleyzhao.walletapp.feature.wallet.model
 
 import com.blankj.utilcode.util.Utils
 import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import site.stanleyzhao.walletapp.feature.wallet.data.CurrencyResponse
 import site.stanleyzhao.walletapp.feature.wallet.data.LiveRateResponse
 import site.stanleyzhao.walletapp.feature.wallet.data.WalletBalanceResponse
 
 class WalletRepository {
 
-
-    fun getCurrencies(): CurrencyResponse {
+    fun getCurrencies(): Flow<CurrencyResponse> = flow {
         val jsonString = readAssetFile("currencies.json")
-        val gson = Gson()
-        return gson.fromJson(jsonString, CurrencyResponse::class.java)
-    }
+        emit(Gson().fromJson(jsonString, CurrencyResponse::class.java))
+    }.flowOn(Dispatchers.IO)
 
-    fun getLiveRates(): LiveRateResponse {
+    fun getLiveRates(): Flow<LiveRateResponse> = flow {
         val jsonString = readAssetFile("live-rates.json")
-        val gson = Gson()
-        return gson.fromJson(jsonString, LiveRateResponse::class.java)
-    }
+        emit(Gson().fromJson(jsonString, LiveRateResponse::class.java))
+    }.flowOn(Dispatchers.IO)
 
-    fun getWalletBalance(): WalletBalanceResponse {
+    fun getWalletBalance(): Flow<WalletBalanceResponse> = flow {
         val jsonString = readAssetFile("wallet-balance.json")
-        val gson = Gson()
-        val walletResponse = gson.fromJson(jsonString, WalletBalanceResponse::class.java)
-        return walletResponse
-    }
+        emit(Gson().fromJson(jsonString, WalletBalanceResponse::class.java))
+    }.flowOn(Dispatchers.IO)
 
     private fun readAssetFile(fileName: String): String {
         val assetManager = Utils.getApp().assets

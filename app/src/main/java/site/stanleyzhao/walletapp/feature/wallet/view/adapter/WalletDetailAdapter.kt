@@ -1,4 +1,4 @@
-package site.stanleyzhao.walletapp.feature.wallet.view
+package site.stanleyzhao.walletapp.feature.wallet.view.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
