@@ -11,23 +11,26 @@ import java.math.RoundingMode
 
 class WalletViewModel : ViewModel() {
 
-    private val repository by lazy {
-        WalletRepository()
-    }
+    private val repository by lazy { WalletRepository() }
 
-    private val _currencies = MutableStateFlow<List<Currency>>(emptyList())
-    private val _liveRates = MutableStateFlow<List<LiveRate>>(emptyList())
-    private val _walletBalance = MutableStateFlow<List<WalletBalance>>(emptyList())
+    private val _errorMessage by lazy { MutableStateFlow<String?>(null) }
+    val errorMessage: StateFlow<String?> get() = _errorMessage
 
+    private val _currencies by lazy { MutableStateFlow<List<Currency>>(emptyList()) }
     val currencies: StateFlow<List<Currency>> get() = _currencies
+
+    private val _liveRates by lazy { MutableStateFlow<List<LiveRate>>(emptyList()) }
     val liveRates: StateFlow<List<LiveRate>> get() = _liveRates
+
+    private val _walletBalance by lazy { MutableStateFlow<List<WalletBalance>>(emptyList()) }
     val walletBalance: StateFlow<List<WalletBalance>> get() = _walletBalance
 
-    private val _mergeBalanceItems = MutableStateFlow<List<MergeBalanceItem>>(emptyList())
+    private val _mergeBalanceItems by lazy { MutableStateFlow<List<MergeBalanceItem>>(emptyList()) }
     val mergeBalanceItems: StateFlow<List<MergeBalanceItem>> get() = _mergeBalanceItems
 
-    private val _totalBalance = MutableStateFlow(0.0)
+    private val _totalBalance by lazy { MutableStateFlow(0.0) }
     val totalBalance: StateFlow<Double> get() = _totalBalance
+
 
     fun getDashboardData(){
         loadCurrencies()
@@ -37,27 +40,39 @@ class WalletViewModel : ViewModel() {
 
     private fun loadCurrencies() {
         viewModelScope.launch {
-            repository.getCurrencies().collectLatest {
-                _currencies.value = it.currencies
-                mergeData()
+            repository.getCurrencies().collectLatest { result ->
+                result.onSuccess {
+                    _currencies.value = it.currencies
+                    mergeData()
+                }.onFailure { e ->
+                    _errorMessage.value = "Failed to load currency list: ${e.message}"
+                }
             }
         }
     }
 
     private fun loadLiveRates() {
         viewModelScope.launch {
-            repository.getLiveRates().collectLatest {
-                _liveRates.value = it.tiers
-                mergeData()
+            repository.getLiveRates().collectLatest { result ->
+                result.onSuccess {
+                    _liveRates.value = it.tiers
+                    mergeData()
+                }.onFailure { e ->
+                    _errorMessage.value = "Failed to load exchange rates: ${e.message}"
+                }
             }
         }
     }
 
     private fun loadWalletBalance() {
         viewModelScope.launch {
-            repository.getWalletBalance().collectLatest {
-                _walletBalance.value = it.wallet
-                mergeData()
+            repository.getWalletBalance().collectLatest { result ->
+                result.onSuccess {
+                    _walletBalance.value = it.wallet
+                    mergeData()
+                }.onFailure { e ->
+                    _errorMessage.value = "Failed to load wallet balance: ${e.message}"
+                }
             }
         }
     }

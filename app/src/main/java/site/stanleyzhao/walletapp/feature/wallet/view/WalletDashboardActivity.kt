@@ -1,6 +1,7 @@
 package site.stanleyzhao.walletapp.feature.wallet.view
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
@@ -51,6 +52,13 @@ class WalletDashboardActivity : AppCompatActivity() {
                 launch {
                     walletViewModel.totalBalance.collect { total ->
                         walletDetailAdapter.submitList(listOf(WalletDetail(total)))
+                    }
+                }
+                launch {
+                    walletViewModel.errorMessage.collect { error ->
+                        error?.let {
+                            Toast.makeText(this@WalletDashboardActivity, it, Toast.LENGTH_LONG).show()
+                        }
                     }
                 }
             }
